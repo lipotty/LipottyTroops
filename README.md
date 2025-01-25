@@ -1,0 +1,2 @@
+# LipottyTroops
+骑砍2利用Prefix前置补丁重写RecruitVolunteersFromNotable方法
