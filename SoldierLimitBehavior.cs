@@ -51,8 +51,8 @@ namespace LipottyTroops
         {
             // 注册每日事件，检查士兵数量是否超过上限
             CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, new Action(CheckSoldierLimits));
-            // 注册每日事件，处理延迟移除任务
-            CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, new Action(ProcessDelayedRemovalTasks));
+            // // 注册每日事件，处理延迟移除任务
+            // CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, new Action(ProcessDelayedRemovalTasks));
         }
 
         public override void SyncData(IDataStore dataStore)
@@ -71,7 +71,19 @@ namespace LipottyTroops
             // 获取玩家氏族的定居点和部队列表
             var settlements = playerClan.Settlements;
             var parties = GetClanParties(playerClan); // 获取氏族部队
-
+            //整合两个事件
+            var currentLength = delayedRemovalTasks.Count;
+            for (var i = 0; i < currentLength; i++)
+            {
+                var task = delayedRemovalTasks.Dequeue();
+                int totalSoldiers = CalculateTotalSoldiers(task.TroopLimit.TroopIds, settlements, parties);
+                int limit = troopLimitValues[task.TroopLimit.Name];
+                if (totalSoldiers > limit)
+                {
+                    int excessSoldiers = totalSoldiers - limit;
+                    RemoveExcessSoldiers(task.TroopLimit.TroopIds, excessSoldiers, task.TroopLimit);
+                }
+            }
             // 遍历每个兵种集合，检查是否超过上限
             foreach (var troopLimit in troopLimits)
             {
@@ -105,33 +117,33 @@ namespace LipottyTroops
             }
         }
 
-        private void ProcessDelayedRemovalTasks()
-        {
-            Clan playerClan = Clan.PlayerClan; // 获取玩家氏族
-            if (playerClan == null)
-            {
-                return; // 如果玩家没有氏族，则跳过
-            }
-
-            // 获取玩家氏族的定居点和部队列表
-            var settlements = playerClan.Settlements;
-            var parties = GetClanParties(playerClan); // 获取氏族部队
-
-            // 处理所有延迟移除任务
-            while (delayedRemovalTasks.Count > 0)
-            {
-                var task = delayedRemovalTasks.Dequeue();
-                int totalSoldiers = CalculateTotalSoldiers(task.TroopLimit.TroopIds, settlements, parties);
-                int limit = troopLimitValues[task.TroopLimit.Name];
-
-                // 如果士兵数量仍然超出上限，则执行移除操作
-                if (totalSoldiers > limit)
-                {
-                    int excessSoldiers = totalSoldiers - limit;
-                    RemoveExcessSoldiers(task.TroopLimit.TroopIds, excessSoldiers, task.TroopLimit);
-                }
-            }
-        }
+        // private void ProcessDelayedRemovalTasks()
+        // {
+        //     Clan playerClan = Clan.PlayerClan; // 获取玩家氏族
+        //     if (playerClan == null)
+        //     {
+        //         return; // 如果玩家没有氏族，则跳过
+        //     }
+        //
+        //     // 获取玩家氏族的定居点和部队列表
+        //     var settlements = playerClan.Settlements;
+        //     var parties = GetClanParties(playerClan); // 获取氏族部队
+        //
+        //     // 处理所有延迟移除任务
+        //     while (delayedRemovalTasks.Count > 0)
+        //     {
+        //         var task = delayedRemovalTasks.Dequeue();
+        //         int totalSoldiers = CalculateTotalSoldiers(task.TroopLimit.TroopIds, settlements, parties);
+        //         int limit = troopLimitValues[task.TroopLimit.Name];
+        //
+        //         // 如果士兵数量仍然超出上限，则执行移除操作
+        //         if (totalSoldiers > limit)
+        //         {
+        //             int excessSoldiers = totalSoldiers - limit;
+        //             RemoveExcessSoldiers(task.TroopLimit.TroopIds, excessSoldiers, task.TroopLimit);
+        //         }
+        //     }
+        // }
 
         private int CalculateTroopLimit(TroopLimit troopLimit, IEnumerable<Settlement> settlements)
         {
