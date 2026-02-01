@@ -7,7 +7,7 @@ using HarmonyLib;
 using TaleWorlds.Core;
 using TaleWorlds.Localization;
 
-namespace LipottyTroops
+namespace LipottyTroops.Patches
 {
     [HarmonyPatch(typeof(GameTexts), "FindText")]
     public class CustomTextPatch

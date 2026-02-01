@@ -23,4 +23,48 @@ namespace LipottyTroops
             HearthPerLimit = hearthPerLimit; // 初始化户数计算比例
         }
     }
+
+    public class MercenaryLimit
+    {
+        public List<string> TroopIds { get; } // 佣兵兵种ID列表
+        private readonly Settings _settings;
+
+        public MercenaryLimit(List<string> troopIds, Settings settings)
+        {
+            TroopIds = troopIds;
+            _settings = settings;
+        }
+
+        public int GetLimitForTier(int tier, int leadershipSkill)
+        {
+            // 基础值 + 家族等级加成 + 统御技能加成
+            int baseLimit = _settings.MercenaryBaseLimit;
+            int tierBonus = tier * _settings.MercenaryPerTier;
+
+            // 统御技能加成（每2点增加1，四舍五入）
+            int leadershipBonus = (int)Math.Round(leadershipSkill * _settings.LeadershipBonusFactor);
+
+            return baseLimit + tierBonus + leadershipBonus;
+        }
+
+        public class BanditLimit
+        {
+            public List<string> TroopIds { get; } // 强盗兵种ID列表
+            private readonly Settings _settings;
+
+            public BanditLimit(List<string> troopIds, Settings settings)
+            {
+                TroopIds = troopIds;
+                _settings = settings;
+            }
+
+            public int GetLimit(int leadershipSkill)
+            {
+                // 基础值 + 统御技能加成（每2点增加1）
+                int baseLimit = _settings.BanditBaseLimit;
+                int leadershipBonus = (int)Math.Round(leadershipSkill * _settings.BanditLeadershipFactor);
+                return baseLimit + leadershipBonus;
+            }
+        }
+    }
 }

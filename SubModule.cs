@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,10 +20,18 @@ namespace LipottyTroops
     {
         private bool _shouldLoadPatches = true;
         public static Settings ModSettings { get; private set; }
+        
+        // 添加静态属性存储MOD路径
+        public static string ModulePath { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
+
+            // 正确获取 MOD 根目录（包含 SubModule.xml 的目录）
+            ModulePath = Path.GetDirectoryName(typeof(SubModule).Assembly.Location);
+            string binPath = Path.Combine(ModulePath, ".."); // 回到bin目录
+            ModulePath = Path.Combine(binPath, "..");        // 回到mod根目录
 
             // 初始化 ModSettings
             ModSettings = GlobalSettings<Settings>.Instance;
@@ -43,6 +52,9 @@ namespace LipottyTroops
             if (game.GameType is Campaign)
             {
                 CampaignGameStarter campaignStarter = (CampaignGameStarter)gameStarter;
+
+                // 注册 ModIntroductionBehavior
+                campaignStarter.AddBehavior(new ModIntroductionBehavior());
 
                 // 注册 SoldierLimitBehavior
                 campaignStarter.AddBehavior(new SoldierLimitBehavior());

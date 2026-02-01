@@ -9,7 +9,7 @@ using TaleWorlds.CampaignSystem.CharacterDevelopment;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.CampaignSystem;
 
-namespace LipottyTroops
+namespace LipottyTroops.Patches
 {
     [HarmonyPatch(typeof(ATCVolunteerProductionModel), "MaximumIndexHeroCanRecruitFromHero")]
     [HarmonyPriority(Priority.High)]
